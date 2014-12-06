@@ -1,0 +1,8 @@
+*.class
+*.aux
+*.fdb*
+*.fls
+*.log
+*.out
+*.toc
+tcr-main.pdf
