@@ -1,5 +1,6 @@
 /* Dijkstra
- * Finds the shortest paths from one vertex to every other vertex in the graph (SSSP). \\
+ * Finds the shortest paths from one vertex to every other vertex in the graph (SSSP).
+ * For negative weights, add |min|+1 to each edge, later subtract from result.\\
  * Input: A source vertex $s$ and an adjacency list $G$. \\
  * Output: Modified adj. list with distances from s and predcessor vertices set.
  ** |E|\log|V|
