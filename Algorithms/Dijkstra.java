@@ -1,51 +1,93 @@
 /* Dijkstra
  * Finds the shortest paths from one vertex to every other vertex in the graph (SSSP). \\
- * Input: A source vertex $s$ and an adjacency matrix $G$. \\
- * Output: Either a map of all distances (dist) or all predecessors (prev).
+ * Input: A source vertex $s$ and an adjacency list $G$. \\
+ * Output: Modified adj. list with distances from s and predcessor vertices set.
  ** |E|\log|V|
  */
+import java.util.*;
+
 //START
-public static Map<Integer, Double> dijkstra(int s, double[][] G) {
-	Map<Integer, Double> dist = new HashMap<Integer, Double>();
-	Map<Integer, Integer> prev = new HashMap<Integer, Integer>();
-	PriorityQueue<Vertex> H = new PriorityQueue<Vertex>();
-	prev.put(s, s);
-	Vertex[] vertices = new Vertex[G.length];
-	// init dist with infity
-	for (int i = 0; i < G.length; i++) {
-		if (i == s) {
-			dist.put(s, 0.0);
-		} else {
-			dist.put(i, Double.MAX_VALUE);
-		}
-		vertices[i] = new Vertex();
-		vertices[i].id = i;
-		vertices[i].valueToCompare = dist;
-		H.offer(vertices[i]);
+class Vertex implements Comparable<Vertex> {
+	public int id;
+	public double dist;
+	public int pred;
+	public HashMap<Integer,Double> next=new HashMap<>();
+	public Vertex(int i){id=i;}
+	public int compareTo(Vertex v) {
+		if (dist < v.dist) return -1;
+		else if (dist > v.dist) return 1;
+		return 0;
 	}
+}
+//END
+class Main {
+//START
+public static void dijkstra(int s, Map<Integer,Vertex> G) {
+	PriorityQueue<Vertex> H = new PriorityQueue<Vertex>();
+
+	Vertex start = G.get(s);
+	start.pred = start.id;
+	for (int i : G.keySet()) { // init dists with infty
+		Vertex ivert = G.get(i);
+		ivert.id = i;
+		ivert.dist = Double.MAX_VALUE;
+		ivert.pred = -1;
+	}
+	start.pred = start.id; //init start vertex
+	start.dist = 0;
+	H.add(G.get(s));
 	while (!H.isEmpty()) {
-		int u = H.poll().id;
-		for (int v = 0; v < G.length; v++) {
-			if (G[u][v] > 0) {
-				if (dist.get(v) > dist.get(u) + G[u][v]) {
-					dist.put(v, dist.get(u) + G[u][v]);
-					prev.put(v, u);
-					H.remove(vertices[v]);
-					H.add(vertices[v]);
-				}
+		Vertex u = H.poll();
+		for (int v : u.next.keySet()) {
+			Vertex vert = G.get(v);
+			double utov = u.next.get(v);
+			if (vert.dist > u.dist + utov) {
+				vert.dist = u.dist + utov;
+				vert.pred = u.id;
+				H.remove(vert);
+				H.add(vert);
 			}
 		}
 	}
-
-//	System.out.println("-------------------------------------------");
-//	for (int i = 0; i < G.length; i++) {
-//		int v = i + 1;
-//		double d = dist.get(i);
-//		int p = prev.get(i) + 1;
-//		System.out.printf("| Vertex: %5d | Distance: %5d | Prev: %5d |", v, d, p);
-//	}
-//	System.out.println("-------------------------------------------");
-
-	return dist;
 }
 //END
+public static void main(String[] args) {
+	HashMap<Integer,Vertex> G = new HashMap<>();
+	String names = "CBIGFHDEAJ";
+	for (int i=0; i<10; i++) {
+		G.put(i,new Vertex(i));
+	}
+	G.get(2).next.put(1, 3.0); G.get(1).next.put(2, 3.0);
+	G.get(1).next.put(0, 6.0); G.get(0).next.put(1, 6.0);
+	G.get(0).next.put(3, 2.0); G.get(3).next.put(0, 2.0);
+	G.get(0).next.put(5, 7.0); G.get(5).next.put(0, 7.0);
+	G.get(1).next.put(4, 5.0); G.get(4).next.put(1, 5.0);
+	G.get(2).next.put(8, 10.0); G.get(8).next.put(2, 10.0);
+	G.get(3).next.put(7, 5.0); G.get(7).next.put(3, 5.0);
+	G.get(7).next.put(8, 7.0); G.get(8).next.put(7, 7.0);
+	G.get(7).next.put(5, 3.0); G.get(5).next.put(7, 3.0);
+	G.get(4).next.put(6, 1.0); G.get(6).next.put(4, 1.0);
+	G.get(5).next.put(6, 2.0); G.get(6).next.put(5, 2.0);
+	dijkstra(2,G);
+	for (int i=0; i<10; i++){
+		Vertex v = G.get(i);
+		if (v.pred>-1)
+			System.out.println(names.charAt(v.id)+": "+v.dist+" over "+names.charAt(v.pred));
+		else
+			System.out.println(names.charAt(v.id)+" unreachable");
+	}
+}
+/*expected output:
+C: 9.0 over B
+B: 3.0 over I
+I: 0.0 over I
+G: 11.0 over C
+F: 8.0 over B
+H: 11.0 over D
+D: 9.0 over F
+E: 14.0 over H
+A: 10.0 over I
+J unreachable
+*/
+
+}

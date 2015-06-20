@@ -1,60 +1,104 @@
 /* Kosaraju
- ** n^2
- * Indentifies strongly connected components (SCC) in a directed graph. \\
- * Can be used for solving 2SAT in CNF as follows: \\
- * 1) Create the inference graph G such that for each variable xi in the 2-SAT instance, xi and ~xi are vertices of the inference graph. xi and ~xi are complements of each other. \\
- * 2) For each clause (u OR v), add the edges ~u -> v and ~v -> u to the inference graph G. \\
- * 3) Process the strongly connected components S of G in reverse topological order as follows: If S is marked, do nothing. If S = ~S (i.e., a variable and its complement belong to the same SCC), then stop, the instance is unsatisfiable. Otherwise, mark S true and ~S false. \\
- * 4) We get a satisfying assignment by assigning to each variable the truth value of the component containing it. \\
- * Input: An integer adjacency matrix $M$.  \\
+ * Indentifies strongly connected components (SCC) in a directed graph, can be used for solving 2SAT in CNF.\\
+ * For example for $(x1 \lor x2) \land (\lnot x3 \lor x4)$: \\
+ * \texttt{addConstraint(G,1,2); addConstraint(G,-3,4); boolean b = is2SatInstance(G);} \\
+ * Input: HashMap representing the adjacency list.  \\
  * Output: An integer array mapping the color of the corresponding SCC to every vertex in the graph (all colors are natural numbers).
+ ** |E|+|V|
  */
+import java.util.*;
+
 //START
-public static int[] kosaraju(int M[][]) {
+class Vertex {
+	int id;
+	Set<Vertex> next = new HashSet<Vertex>();
+	Set<Vertex> prev = new HashSet<Vertex>();
+	public Vertex(int id) { this.id = id; }
+}
 
-	int color[] = new int[M.length];
-	Stack<Integer> stack = new Stack<Integer>();
-	int colorN = 1;
+//END
+public class Kosaraju {
+//START
+public static HashMap<Integer,Integer> kosaraju(HashMap<Integer, Vertex> M) {
+	HashMap<Integer,Integer> color = new HashMap<Integer,Integer>();
+	Stack<Vertex> stack = new Stack<Vertex>();
 
-	for (int i = 0; i < M.length; i++) {
-		if (color[i] == 0) {
-			sccDFS(M, stack, color, i);
-		}
-	}
+	for (Vertex v : M.values())
+		if (color.get(v.id) == null)
+			sccDFS(stack, color, v);
 
-	for (int i = 0; i < M.length; i++) {
-		color[i] = 0;
-	}
-
-	int v;
-
+	color = new HashMap<Integer,Integer>();
+	int colorN = 0;
 	while (!stack.isEmpty()) {
-		v = stack.pop();
-		if (color[v] == 0) {
-			sccRDFS(M, stack, color, v, colorN++);
-		}
+		Vertex v = stack.pop();
+		if (color.get(v.id) == null)
+			sccRDFS(stack, color, v, colorN++);
 	}
 
 	return color;
 }
 
-public static void sccDFS(int[][] M, Stack<Integer> stack, int[] color, int i) {
-	color[i] = 1;
-	for (int j = 0; j < M.length; j++) {
-		if (M[i][j] > 0 && color[j] == 0) {
-			sccDFS(M, stack, color, j);
+public static void sccDFS(Stack<Vertex> stack, HashMap<Integer,Integer> color, Vertex v) {
+	color.put(v.id,1);
+	for (Vertex nxt : v.next) {
+		if (color.get(nxt.id) == null) {
+			sccDFS(stack, color, nxt);
 		}
 	}
-	stack.push(i);
+	stack.push(v);
 }
 
-public static void sccRDFS(int[][] M, Stack<Integer> stack, int[] color,
-		int j, int colorN) {
-	color[j] = colorN;
-	for (int i = 0; i < M.length; i++) {
-		if (M[i][j] > 0 && color[i] == 0) {
-			sccRDFS(M, stack, color, i, colorN);
-		}
-	}
+public static void sccRDFS(Stack<Vertex> stack, HashMap<Integer,Integer> color, Vertex v, int colorN) {
+	color.put(v.id,colorN);
+	for (Vertex prv : v.prev)
+		if (color.get(prv.id) == null)
+			sccRDFS(stack, color, prv, colorN);
 }
+
+public static void addEdge(HashMap<Integer,Vertex> G, int a, int b) {
+	if (G.get(a)==null) G.put(a, new Vertex(a));
+	if (G.get(b)==null) G.put(b, new Vertex(b));
+	G.get(a).next.add(G.get(b));
+	G.get(b).prev.add(G.get(a));
+}
+
+public static void addConstraint(HashMap<Integer,Vertex> G, int a, int b) {
+	addEdge(G,-a,b); addEdge(G,-b,a);
+}
+
 //END
+//TODO: eine belegung berechnen falls true
+//START
+public static boolean is2SatInstance(HashMap<Integer,Vertex> G) {
+	HashMap<Integer,Integer> color = kosaraju(G);
+	for (Vertex v : G.values())
+		if (color.get(v.id) == color.get(-v.id))
+			return false;
+	return true;
+}
+
+//END
+public static void main(String[] args) {
+	HashMap<Integer,Vertex> G = new HashMap<Integer,Vertex>();
+	addConstraint(G, 1, 2);
+	addConstraint(G, 2, 3);
+	addConstraint(G, 3, 4);
+	addConstraint(G, -1, -3);
+	addConstraint(G, -2, -4);
+	System.out.println(is2SatInstance(G)); //true (0 1 1 0)
+	G = new HashMap<Integer,Vertex>();
+	addConstraint(G, 1, 2);
+	addConstraint(G, 2, 4);
+	addConstraint(G, -1, 2);
+	addConstraint(G, -2, 1);
+	addConstraint(G, -1, -2);
+	System.out.println(is2SatInstance(G)); //false
+	G = new HashMap<Integer,Vertex>();
+	addConstraint(G, 1, 2);
+	addConstraint(G, 2, 4);
+	addConstraint(G, -1, 2);
+	addConstraint(G, 2, -1);
+	addConstraint(G, -1, -2);
+	System.out.println(is2SatInstance(G)); //true (0 1)
+}
+}

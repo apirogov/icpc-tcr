@@ -12,12 +12,11 @@ class Main {
 
 //START
 public static long modexp(long a, long k, long n) {
-	long b = (k%2==1) ? a : 1;
-	k /= 2;
+	long b = 1;
 	while (k != 0) {
+		b = ((k&1)==1) ? b*a % n : b;
+		k >>= 1;
 		a = a*a % n;
-		b = (k%2==1) ? b*a % n : b;
-		k /= 2;
 	}
 	return b;
 }

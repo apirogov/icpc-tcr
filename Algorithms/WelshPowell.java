@@ -54,4 +54,5 @@ public static int[] welshPowell(boolean[][] matrix) {
 
 	return colors;
 }
+//TODO update to Adj. List (like Dijkstra,Kosaraju)
 //END
