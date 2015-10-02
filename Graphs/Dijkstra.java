@@ -1,6 +1,8 @@
 /* Dijkstra
  * Finds the shortest paths from one vertex to every other vertex in the graph (SSSP).
  * For negative weights, add |min|+1 to each edge, later subtract from result.\\
+ * To get a different shortest path when edges are ints, add an
+ * $\epsilon=\frac{1}{k+1}$ on each edge of the shortest path of length $k$, run again. \\
  * Input: A source vertex $s$ and an adjacency list $G$. \\
  * Output: Modified adj. list with distances from s and predcessor vertices set.
  ** |E|\log|V|
@@ -12,6 +14,7 @@ class Vertex implements Comparable<Vertex> {
 	public int id;
 	public double dist;
 	public int pred;
+	public boolean removed;
 	public HashMap<Integer,Double> next=new HashMap<>();
 	public Vertex(int i){id=i;}
 	public int compareTo(Vertex v) {
@@ -33,19 +36,23 @@ public static void dijkstra(int s, Map<Integer,Vertex> G) {
 		ivert.id = i;
 		ivert.dist = Double.MAX_VALUE;
 		ivert.pred = -1;
+		ivert.removed = false;
 	}
 	start.pred = start.id; //init start vertex
 	start.dist = 0;
 	H.add(G.get(s));
+
 	while (!H.isEmpty()) {
 		Vertex u = H.poll();
+		if (u.removed) continue;
+		u.removed = true;
+
 		for (int v : u.next.keySet()) {
 			Vertex vert = G.get(v);
 			double utov = u.next.get(v);
 			if (vert.dist > u.dist + utov) {
 				vert.dist = u.dist + utov;
 				vert.pred = u.id;
-				H.remove(vert);
 				H.add(vert);
 			}
 		}

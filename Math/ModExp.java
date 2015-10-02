@@ -12,13 +12,23 @@ class Main {
 
 //START
 public static long modexp(long a, long k, long n) {
-	long b = 1;
-	while (k != 0) {
-		b = ((k&1)==1) ? b*a % n : b;
-		k >>= 1;
-		a = a*a % n;
+	long b=1;
+	while(k!=0) {
+		b = ((k&1)==1) ? mulmod(a,b,n) : b;
+		k  >>= 1;
+		a = mulmod(a,a,n);
 	}
 	return b;
+}
+
+public static long mulmod(long a, long b, long n) {
+	long res = 0;
+	while (a != 0) {
+		if ((a&1)==1) res = (res + b) % n;
+		a >>= 1;
+		b = (b << 1) % n;
+	}
+	return res;
 }
 //END
 

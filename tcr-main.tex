@@ -68,6 +68,7 @@
         % postbreak=\raisebox{0ex}[0ex][0ex]{\ensuremath{\color{red}\hookrightarrow\space}}
 }
 \usepackage{multicol}
+\setlength{\parindent}{0pt}
 
 \newenvironment{algo}{%
     % variables
@@ -148,20 +149,35 @@
 \end{multicols}
 
 \section{Java Knowhow}
-\subsection{Ausgabeformatierung mit \texttt{DecimalFormat}}
-\begin{tabular}{cl}
-Symbol & Bedeutung\\\hline
-0 &	(Ziffer) – unbelegt wird eine Null angezeigt. (0.234=(00.00)=>00.23)\\
-\# &	(Ziffer) – unbelegt bleibt leer, (keine unnötigen nullen).\\
-. &	Dezimaltrenner. \\
-, &	Gruppiert die Ziffern (eine Gruppe ist so groß wie der Abstand von "," zu ".").\\
-; &	Trennzeichen. Links Muster für pos., rechts für neg. Zahlen\\
-- &	Das Standardzeichen für Negativpräfix\\
-\% &	Prozentwert.\\
-\%\% &	Promille.\\
-X &	Alle anderen Zeichen X können ganz normal benutzt werden.\\
-' &	Ausmarkieren von speziellen Symbolen im Präfix oder Suffix \\
+\subsection{System.out.printf() und String.format()}
+\textbf{Syntax}: \texttt{\%[flags][width][.precision][conv]}
+
+\textbf{flags}: \\ \begin{tabular}{ll}
+  \texttt{-} & left-justify (default: right) \\
+  \texttt{+} & always output number sign \\
+  \texttt{0} & zero-pad numbers \\
+  (space)    & space instead of minus for pos. numbers \\
+  \texttt{,} & group triplets of digits with ,
 \end{tabular}
+
+\textbf{width} specifies output width
+
+\textbf{precision} is for floating point precision
+
+\textbf{conv}: \\ \begin{tabular}{ll}
+  d & byte, short, int, long \\
+  f & float, double \\
+  c & char (use C for uppercase) \\
+  s & String (use S for all uppercase)
+\end{tabular}
+
+\subsection{Speed up IO}
+Use \texttt{BufferedReader br = new BufferedReader(new
+InputStreamReader(System.in));}
+
+Use \texttt{Double.parseDouble(Scanner.next())}
+
+
 
 \includepdf[pages=-,clip,trim=5mm 17mm 0mm 17mm,scale=0.95,pagecommand={\pagestyle{plain}}]{tcs-cheat-sheet.pdf}
 

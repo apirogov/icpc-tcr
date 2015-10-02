@@ -5,4 +5,5 @@
 *.log
 *.out
 *.toc
+tmp*
 tcr-main.pdf
