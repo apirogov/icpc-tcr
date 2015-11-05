@@ -3,7 +3,7 @@
  * Calculates factorizations of all numbers up to n. Usable for max. up to $10^8$!
  * Use isPrime and primeFactors to retrieve this information.
  * $|\mathbb{Z}_n^*| = \varphi(n) = \prod_{p|n} p^{k_p-1}(p-1)$ for factorization
- * $n = \varphi(n)f\prod_{p|n} p^{k_p}$
+ * $n = \prod_{p|n} p^{k_p}$
  */
 import java.util.*;
 //goes well up to 10^8 (<4s), but larger -> out of heap

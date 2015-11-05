@@ -3,6 +3,7 @@
  */
 import java.util.HashMap;
 
+//START
 class TrieNode {
 	public HashMap<Character, TrieNode> next = new HashMap<Character, TrieNode>();
 
@@ -35,3 +36,4 @@ class TrieNode {
 		return false;
 	}
 }
+//END
