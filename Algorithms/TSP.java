@@ -71,9 +71,9 @@ public static int[] tsp(int[][] mat) {
 public static void main(String[] args) {
 	System.out.println(Arrays.toString(tsp(new int[][]{{0}}))); //0
 	int[][] mat = new int[][]{{0,1,2,2},
-							  {2,0,1,2},
-							  {2,2,0,1},
-							  {1,2,2,0}};
+							  {2,0,2,1},
+							  {1,2,0,2},
+							  {2,2,1,0}};
 	int[] ret = tsp(mat);
 	int path = 0;
 	for (int i=0; i<ret.length-1; i++) {
