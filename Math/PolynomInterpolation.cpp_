@@ -1,0 +1,138 @@
+#include <iostream>
+#include <vector>
+#include <utility>
+using namespace std;
+
+// Typ für Zahlen. Normalerweise irgendwas BigInt-mäßiges...
+typedef long long Number;
+
+// Klasse für Brüche. Double taugt hier nur selten, da schnell Ungenauigkeiten auftreten, vor allem da Polynominterpolation prinzipiell erst bei sehr großen Zahlen zum Einsatz kommt.
+class Fraction
+{
+private:
+	Fraction() { }
+	
+	// ggT
+	Number Gcd(Number a, Number b)
+	{
+		if(b == 0)
+			return a;
+		else return Gcd(b, a % b);
+	}
+	
+	void Reduce()
+	{
+		Number gcd;
+		if((gcd = Gcd(X, Y)) > 1)
+		{
+			X /= gcd;
+			Y /= gcd;
+		}
+	}
+	
+public:
+	Number X;
+	Number Y;
+
+	Fraction(Number x, Number y)
+	{
+		X = x;
+		Y = y;
+		Reduce();
+	};
+	
+	void operator+=(Fraction b)
+	{
+		X = X * b.Y + b.X * Y;
+		Y *= b.Y;
+		Reduce();
+	}
+	
+	void operator-=(Fraction b)
+	{
+		X = X * b.Y - b.X * Y;
+		Y *= b.Y;
+		Reduce();
+	}
+	
+	Fraction operator*=(Fraction b)
+	{
+		X *= b.X;
+		Y *= b.Y;
+		Reduce();
+	}
+};
+
+// Alias für ein Polynom: Stützstellen und Koeffizienten.
+typedef pair<vector<Number>, vector<Fraction>> Polynom;
+
+// Interpoliert für die angegebenen nach x-Wert sortierten Stützpunkte ein Polynom.
+Polynom NewtonInterpolation(vector<pair<Number, Number>> samples)
+{
+	// Das Polynom hat maximal einen Grad eins kleiner als die Anzahl der Stützstellen
+	int n = samples.size() - 1;
+	
+	// Polynom durch Lösen des Newton-Gleichungssystems bestimmen
+	Polynom result;
+	for(int i = 0; i <= n; ++i)
+	{
+		// Koeffizienten berechnen
+		Fraction a(samples[i].second, 1);
+		for(int j = 0; j < i; ++j)
+		{
+			a -= result.second[j];
+			a *= Fraction(1, samples[i].first - samples[j].first);
+		}
+		
+		// Stützstelle und Koeffizienten merken
+		result.first.push_back(samples[i].first);
+		result.second.push_back(a);
+	}
+	
+	// Fertig
+	return result;
+}
+
+// Berechnet den Wert des Polynoms an der gegebenen Stelle.
+Fraction CalculateValue(Polynom p, Number x)
+{
+	// Grad für kürzere Schreibweise
+	int n = p.first.size() - 1;
+	
+	// Mit Horner-Schema Wert berechnen
+	Fraction b = p.second[n];
+	for(int i = n - 1; i >= 0; --i)
+	{
+		b *= Fraction(x - p.first[i], 1);
+		b += p.second[i];
+	}
+	return b;
+}
+
+// UVa-Aufgabe #12143.
+#define abs(x) ((x) < 0 ? -(x) : (x))
+Number strangeFunc(int n)
+{
+	long long result = 0;
+	for(long long i = 1; i < n; ++i)
+	for(long long j = 1; j < n; ++j)
+	for(long long k = 1; k < n; ++k)
+	for(long long l = 1; l < n; ++l)
+	for(long long m = 1; m < n; ++m)
+		result += abs(abs(i-j) * abs(j-k) * abs(k-l) * abs(l-m) * abs(m-i));
+	return static_cast<Number>(result);
+}
+
+// Hauptprogramm.
+int main()
+{
+	vector<pair<Number, Number>> samples;
+	for(int i = 0; i < 17; ++i)
+		samples.push_back(make_pair(i, strangeFunc(i)));
+	
+	Polynom p = NewtonInterpolation(samples);
+	
+	int T = 20;
+	Fraction value = CalculateValue(p, T + 1);
+	cout << (value.X % 10007) << endl;
+}
